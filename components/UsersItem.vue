@@ -34,4 +34,23 @@ function deleteUser() {
 </script>
 
 <style scoped lang='scss'>
+  .users-list__item {
+    padding: 15px 30px;
+    border: 1px solid black;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 30px;
+    justify-content: space-between;
+    align-items: flex-start;
+
+  }
+
+  .users-list__buttons {
+    display: flex;
+    gap: 30px;
+  }
+
+  .users-list__del {
+    background-color: #a10000;
+  }
 </style>
