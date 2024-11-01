@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rm-frontend.fullname" . }}
+  labels:
+    {{- include "rm-frontend.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.replicaCount }}
+      maxUnavailable: 0
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rm-frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        git_commit: {{ .Values.git.commit }}
+        app.gitlab.com/app: {{ .Values.git.path }}
+        app.gitlab.com/env: {{ .Values.git.branch }}
+        timestamp: "{{ .Values.annotations.timestamp }}"
+      labels:
+        {{- include "rm-frontend.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rm-frontend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ .Values.registry.image }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources.service | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+{{- if .Values.healthcheck.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /check
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /check
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+{{- end }}
+        - name: nginx
+          image: mirror.gcr.io/nginx:latest
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: nginx
+              containerPort: {{ .Values.nginx.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources.nginx | nindent 12 }}
+          volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d/s4m.conf
+            subPath: s4m.conf
+            readOnly: true
+          - name: nginx-config-main
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            defaultMode: 0600
+            name: {{ include "rm-frontend.fullname" . }}
+        - name: nginx-config
+          projected:
+            sources:
+            - configMap:
+                name: {{ .Release.Name }}-nginx
+                items:
+                  - key: s4m.conf
+                    path: s4m.conf
+        - name: nginx-config-main
+          projected:
+            sources:
+            - configMap:
+                name: {{ .Release.Name }}-nginx-conf
+                items:
+                  - key: nginx.conf
+                    path: nginx.conf
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

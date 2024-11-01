@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rm-frontend.fullname" . }}
+  labels:
+    {{- include "rm-frontend.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.nginx.port }}
+      targetPort: nginx
+      protocol: TCP
+      name: nginx
+  selector:
+    {{- include "rm-frontend.selectorLabels" . | nindent 4 }}

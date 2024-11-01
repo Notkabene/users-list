@@ -1,0 +1,21 @@
+{{- if .Values.reload.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "rm-frontend.fullname" . }}
+rules:
+  - verbs:
+      - '*'
+    apiGroups:
+      - ''
+      - policy
+      - batch
+      - extensions
+      - apps
+      - certmanager.k8s.io
+      - cert-manager.io
+      - networking.istio.io
+      - autoscaling.k8s.io
+    resources:
+      - '*'
+{{- end }}

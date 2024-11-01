@@ -1,0 +1,27 @@
+@import './_reset';
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 40px;
+}
+
+body {
+  font-family: Calibri, sans-serif;
+}
+
+.main {
+  margin-top: 40px;
+}
+
+.btn {
+  background-color: #20b2aa;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+}
+
+.link {
+  color: #20b2aa;
+}

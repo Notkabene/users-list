@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rm-frontend.fullname" . }}
+  labels:
+    {{- include "rm-frontend.labels" . | nindent 4 }}
+data:
+  conf.yml: |
+    {{ .Values.config | nindent 4 }}

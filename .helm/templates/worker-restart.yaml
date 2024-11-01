@@ -1,0 +1,42 @@
+{{- if .Values.reload.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-rst
+spec:
+  schedule: 0 */8 * * *
+  concurrencyPolicy: Forbid
+  suspend: false
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      activeDeadlineSeconds: 600
+      backoffLimit: 2
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+            - name: kubectl
+              image: mirror.gcr.io/bitnami/kubectl
+              command:
+                - bash
+                - '-c'
+                - >-
+                  kubectl rollout restart deployment {{ include "rm-frontend.fullname" . }}
+                  && kubectl rollout status deployment {{ include "rm-frontend.fullname" . }}
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          serviceAccountName: {{ include "rm-frontend.serviceAccountName" . }}
+          serviceAccount: {{ include "rm-frontend.serviceAccountName" . }}
+          securityContext: {}
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+{{- end }}

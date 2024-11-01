@@ -1,0 +1,11 @@
+Dockerfile
+docker-compose.yml
+.dockerignore
+.editorconfig
+.git*
+.helm
+.sops.yaml
+.simple
+
+node_modules
+npm-debug.log

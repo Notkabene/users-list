@@ -1,0 +1,17 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "rm-frontend.fullname" . }}
+spec:
+  gateways:
+    - {{ include "rm-frontend.fullname" . }}
+  hosts:
+    - {{ .Values.ingress.domain }}
+  http:
+    - route:
+        - destination:
+            host: {{ include "rm-frontend.fullname" . }}
+            port:
+              number: {{ .Values.nginx.port }}
+{{- end }}

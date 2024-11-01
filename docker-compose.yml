@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  node-service:
+    image: ${CI_REGISTRY_IMAGE:-s4m}/${SERVICE_NAME:-s4m-nuxt-frontend}-${ENV_NAME:-dev}:${CI_PIPELINE_IID:-latest}
+    build:
+      context: .
+      dockerfile: ${DOCKERFILE_PATH}
+      cache_from:
+        - ${CI_REGISTRY_IMAGE:-s4m}/${SERVICE_NAME:-s4m-nuxt-frontend}-${ENV_NAME:-dev}:${BEFORE_TAG:-latest}
+    deploy:
+      resources:
+        limits:
+          cpus: ${ENV_CPU_LIMIT}
+          memory: ${ENV_MEMORY_LIMIT}
+        reservations:
+          memory: ${ENV_MEMORY_RESERV}
+    restart: always
+    logging:
+        driver: "json-file"
+        options:
+            max-size: "200m"
+            max-file: "10"
+    ports:
+      - "${ENV_HOSTNAME}:${ENV_PORTMAP}"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.110.0/24

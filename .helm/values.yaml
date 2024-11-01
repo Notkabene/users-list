@@ -1,0 +1,85 @@
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: backend 
+
+nameOverride: ""
+fullnameOverride: ""
+
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+
+
+
+service:
+  port: 3000
+nginx:
+  port: 8000
+
+
+ingress:
+  enabled: true
+
+
+reload:
+  enabled: false
+
+
+healthcheck:
+  enabled: false
+
+
+resources:
+  service:
+    limits:
+      cpu: 128m
+      memory: 128Mi
+    requests:
+      cpu: 128m
+      memory: 128Mi
+  nginx:
+    limits:
+      cpu: 32m
+      memory: 32Mi
+    requests:
+      cpu: 32m
+      memory: 32Mi
+
+
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+
+
+nodeSelector: []
+
+
+tolerations: {}
+
+
+
+affinity: {}
+
+
+
+
+

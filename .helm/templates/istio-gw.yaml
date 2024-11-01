@@ -1,0 +1,16 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "rm-frontend.fullname" . }}
+spec:
+  selector:
+    istio: ingress
+  servers:
+    - hosts:
+        - {{ .Values.ingress.domain }}
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
+{{- end }}
